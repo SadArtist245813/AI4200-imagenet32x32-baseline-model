@@ -42,6 +42,8 @@ def train(task, X_train, y_train, seed=0, device="cuda"):
     loss_fn = nn.CrossEntropyLoss()           # expects raw logits
     optimizer = torch.optim.SGD(model.parameters(), lr=LEARNING_RATE)
 
+    grad_norm = None
+
     # 4. The training loop.
     model.train()
     for epoch in range(EPOCHS[task]):
@@ -54,6 +56,13 @@ def train(task, X_train, y_train, seed=0, device="cuda"):
 
             optimizer.zero_grad()             # clear old gradients
             loss.backward()                   # backward pass: compute gradients
+
+            grad_norm = torch.sqrt(sum(
+                parameter.grad.detach().pow(2).sum()
+                for parameter in model.parameters()
+                if parameter.grad is not None
+            )).item()
+
             optimizer.step()                  # update the weights
 
             total_loss += loss.item() * len(X_batch)
