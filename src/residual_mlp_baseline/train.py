@@ -27,7 +27,7 @@ def prepare(X):
 # Change anything inside them, but keep their names and arguments.
 # ---------------------------------------------------------------------------
 
-def train(task, X_train, y_train, seed=0, device="cuda"):
+def train(task, X_train, y_train, seed=0, device="cuda", record=False):
     """Build a new model and train it from scratch. Returns the trained model."""
     torch.manual_seed(seed)                   # makes the run reproducible
 
@@ -41,6 +41,21 @@ def train(task, X_train, y_train, seed=0, device="cuda"):
     # 3. Choose the loss and the optimizer.
     loss_fn = nn.CrossEntropyLoss()           # expects raw logits
     optimizer = torch.optim.SGD(model.parameters(), lr=LEARNING_RATE)
+    
+    diagnostics = {
+        "train_loss": [],
+        "diagnostic_steps": [],
+        "epoch_end_steps": [],
+        "stream_variance": [],
+        "sample_correlation": [],
+        "stream_grad_rms": [],
+        "linear1_grad_rms": [],   # blocks[i].fc1.weight gradient RMS
+        "linear2_grad_rms": [],   # blocks[i].fc2.weight gradient RMS
+        "diverged_at_step": None,
+        "validation_accuracy": [],
+        "test_accuracy": None,    # filled by the harness after evaluation
+        "learning_rate": LEARNING_RATE,
+    } if record else None
 
     grad_norm = None
 
@@ -56,12 +71,6 @@ def train(task, X_train, y_train, seed=0, device="cuda"):
 
             optimizer.zero_grad()             # clear old gradients
             loss.backward()                   # backward pass: compute gradients
-
-            grad_norm = torch.sqrt(sum(
-                parameter.grad.detach().pow(2).sum()
-                for parameter in model.parameters()
-                if parameter.grad is not None
-            )).item()
 
             optimizer.step()                  # update the weights
 

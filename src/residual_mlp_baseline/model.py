@@ -1,7 +1,6 @@
 import torch
 import torch.nn as nn
 
-
 # Each task differs only in its input size and its number of classes.
 # The same model class is used for all three.
 TASKS = {
@@ -10,6 +9,9 @@ TASKS = {
     "imagenet32": {"in_features": 3 * 32 * 32, "num_classes": 1000},  # 32x32 color
 }
 
+WIDTH = 128   # Width of the Neural Network
+HIDDEN = 256  # Number of neurons in in each hidden layer
+DEPTH = 30    # Number of residual blocks in the backbone
 
 class Block(nn.Module):
     """One residual block:  x + Linear(ReLU(Linear(LayerNorm(x))))
@@ -28,7 +30,6 @@ class Block(nn.Module):
         h = self.fc2(torch.relu(self.fc1(self.norm(x))))
         return x + h                          # skip connection: add the input back
 
-
 class ResidualMLP(nn.Module):
     """Baseline residual MLP.
 
@@ -41,7 +42,7 @@ class ResidualMLP(nn.Module):
     differs from its input size (width), so the two cannot be added.
     """
 
-    def __init__(self, in_features, num_classes, width=128, hidden=256, depth=30):
+    def __init__(self, in_features, num_classes, width=WIDTH, hidden=HIDDEN, depth=DEPTH):
         super().__init__()
 
         # Project the flattened image down to the backbone width.
@@ -62,7 +63,7 @@ class ResidualMLP(nn.Module):
                 nn.init.zeros_(layer.bias)
 
     def forward(self, x):
-        """Training forward pass. Returns raw logits (no softmax).
+        """Training forward pass. Returns raw logits (no softmax).W
 
         nn.CrossEntropyLoss applies the softmax itself, so training uses logits.
         """
@@ -70,7 +71,7 @@ class ResidualMLP(nn.Module):
         x = self.input_layer(x)
         for block in self.blocks:
             x = block(x)
-        x = self.head_fc2(torch.relu(self.head_fc1(self.head_norm(x))))
+        x = self.head_fc2(torch.relu(self.head_fc1(self.head_norm(x)))) # Linear - > ReLU -> Linear
         return x
 
     def predict(self, x):
