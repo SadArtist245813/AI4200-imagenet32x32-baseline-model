@@ -78,6 +78,9 @@ def train(task, X_train, y_train, seed=0, device="cuda", record=False):
 
         print(f"epoch {epoch + 1}: train loss {total_loss / len(dataset):.4f}")
 
+        if diagnostics is not None:
+            diagnostics["train_loss"].append(total_loss / len(dataset))
+
     return model
 
 

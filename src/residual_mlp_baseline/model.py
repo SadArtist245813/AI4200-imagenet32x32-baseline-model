@@ -14,7 +14,7 @@ HIDDEN = 256  # Number of neurons in in each hidden layer
 DEPTH = 30    # Number of residual blocks in the backbone
 
 class Block(nn.Module):
-    """One residual block:  x + Linear(ReLU(Linear(LayerNorm(x))))
+    """One residual block:  x + Linear(SiLU(Linear(LayerNorm(x))))
 
     The block expands to `hidden` features, applies tanh, and projects back to
     `width` features so its output can be added to its input (the skip connection).
@@ -27,7 +27,7 @@ class Block(nn.Module):
         self.fc2 = nn.Linear(hidden, width)   # project: hidden -> width
 
     def forward(self, x):
-        h = self.fc2(torch.relu(self.fc1(self.norm(x))))
+        h = self.fc2(nn.functional.silu(self.fc1(self.norm(x))))
         return x + h                          # skip connection: add the input back
 
 class ResidualMLP(nn.Module):
@@ -35,7 +35,7 @@ class ResidualMLP(nn.Module):
 
     input -> Linear(in_features -> width)            project into the backbone
           -> depth x Block                           residual backbone, stays `width` wide
-          -> LayerNorm -> Linear -> ReLU -> Linear   head: a block without the skip
+          -> LayerNorm -> Linear -> SiLU -> Linear   head: a block without the skip
           -> logits (num_classes)
 
     The head has no skip connection because its output size (num_classes)
@@ -71,7 +71,13 @@ class ResidualMLP(nn.Module):
         x = self.input_layer(x)
         for block in self.blocks:
             x = block(x)
-        x = self.head_fc2(torch.relu(self.head_fc1(self.head_norm(x)))) # Linear - > ReLU -> Linear
+
+        # Steps used in each Neuron
+        x = self.head_norm(x) # Normilization
+        x = self.head_fc1(x) # Linear
+        x = nn.functional.silu(x) # Activation
+        x = self.head_fc2(x) # Linear
+
         return x
 
     def predict(self, x):
