@@ -62,15 +62,21 @@ class ResidualMLP(nn.Module):
                 nn.init.xavier_normal_(layer.weight)
                 nn.init.zeros_(layer.bias)
 
-    def forward(self, x):
+    def forward(self, x, streams=None):
         """Training forward pass. Returns raw logits (no softmax).W
 
         nn.CrossEntropyLoss applies the softmax itself, so training uses logits.
         """
         x = x.flatten(start_dim=1)            # (N, C, H, W) -> (N, C*H*W)
         x = self.input_layer(x)
+        if streams is not None:
+            x.retain_grad()
+            streams.append(x)
         for block in self.blocks:
             x = block(x)
+            if streams is not None:
+                x.retain_grad()
+                streams.append(x)
 
         # Steps used in each Neuron
         x = self.head_norm(x) # Normilization

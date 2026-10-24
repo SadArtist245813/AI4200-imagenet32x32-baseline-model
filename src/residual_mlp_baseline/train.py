@@ -56,8 +56,43 @@ def train(task, X_train, y_train, seed=0, device="cuda", record=False):
         "test_accuracy": None,    # filled by the harness after evaluation
         "learning_rate": LEARNING_RATE,
     } if record else None
+    model.diagnostics = diagnostics
 
-    grad_norm = None
+    step = 0  # number of completed optimizer updates
+
+    def record_snapshot(streams):
+        # The last epoch's final snapshot may already cover this step.
+        if diagnostics["diagnostic_steps"] and diagnostics["diagnostic_steps"][-1] == step:
+            return
+        diagnostics["diagnostic_steps"].append(step)
+        diagnostics["stream_variance"].append([
+            stream.detach().var(unbiased=False).item() for stream in streams
+        ])
+        correlations = []
+        for stream in streams:
+            samples = stream.detach()
+            samples = samples - samples.mean(dim=1, keepdim=True)
+            samples = nn.functional.normalize(samples, dim=1)
+            batch_size = samples.size(0)
+            correlation = (
+                (samples.sum(dim=0).square().sum() - samples.square().sum())
+                / (batch_size * (batch_size - 1))
+                if batch_size > 1 else samples.new_zeros(())
+            )
+            correlations.append(correlation.item())
+        diagnostics["sample_correlation"].append(correlations)
+        diagnostics["stream_grad_rms"].append([
+            stream.grad.detach().square().mean().sqrt().item()
+            for stream in streams
+        ])
+        diagnostics["linear1_grad_rms"].append([
+            block.fc1.weight.grad.detach().square().mean().sqrt().item()
+            for block in model.blocks
+        ])
+        diagnostics["linear2_grad_rms"].append([
+            block.fc2.weight.grad.detach().square().mean().sqrt().item()
+            for block in model.blocks
+        ])
 
     # 4. The training loop.
     model.train()
@@ -66,20 +101,39 @@ def train(task, X_train, y_train, seed=0, device="cuda", record=False):
         for X_batch, y_batch in loader:
             X_batch, y_batch = X_batch.to(device), y_batch.to(device)
 
-            logits = model(X_batch)           # forward pass
+            streams = [] if record else None
+            logits = model(X_batch, streams=streams)  # forward pass
             loss = loss_fn(logits, y_batch)   # how wrong are we?
-
+            
+            # Recoding Diagnostics
+            if diagnostics is not None:
+                diagnostics["train_loss"].append(loss.item())
+                
             optimizer.zero_grad()             # clear old gradients
             loss.backward()                   # backward pass: compute gradients
 
+            # Recoding Diagnostics
+            if diagnostics is not None:
+                record_snapshot(streams)
+                streams.clear()              # free memory for the next batch
+
             optimizer.step()                  # update the weights
+            step += 1
 
             total_loss += loss.item() * len(X_batch)
 
         print(f"epoch {epoch + 1}: train loss {total_loss / len(dataset):.4f}")
 
+        # Recording Diagnostics
         if diagnostics is not None:
-            diagnostics["train_loss"].append(total_loss / len(dataset))
+            diagnostics["epoch_end_steps"].append(step)
+            # Measure after the final update; do not take another optimizer step.
+            streams = []
+            logits = model(X_batch, streams=streams)
+            optimizer.zero_grad()
+            loss_fn(logits, y_batch).backward()
+            record_snapshot(streams)
+            streams.clear()
 
     return model
 
