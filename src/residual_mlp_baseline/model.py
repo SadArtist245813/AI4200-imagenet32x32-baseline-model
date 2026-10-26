@@ -14,9 +14,9 @@ HIDDEN = 256  # Number of neurons in in each hidden layer
 DEPTH = 15    # Number of residual blocks in the backbone
 
 class Block(nn.Module):
-    """One residual block:  x + Linear(SiLU(Linear(LayerNorm(x))))
+    """One residual block with a pre-normalized SwiGLU branch.
 
-    The block expands to `hidden` features, applies tanh, and projects back to
+    The block expands to `hidden` features, applies SwiGLU, and projects back to
     `width` features so its output can be added to its input (the skip connection).
     """
 
@@ -24,10 +24,12 @@ class Block(nn.Module):
         super().__init__()
         self.norm = nn.LayerNorm(width)       # pre-norm: normalize before the layers
         self.fc1 = nn.Linear(width, hidden)   # expand:  width  -> hidden
+        self.gate = nn.Linear(width, hidden)  # SwiGLU gating projection
         self.fc2 = nn.Linear(hidden, width)   # project: hidden -> width
 
     def forward(self, x):
-        h = self.fc2(nn.functional.silu(self.fc1(self.norm(x))))
+        z = self.norm(x)
+        h = self.fc2(nn.functional.silu(self.fc1(z)) * self.gate(z))
         return x + h                          # skip connection: add the input back
 
 class ResidualMLP(nn.Module):
@@ -55,6 +57,8 @@ class ResidualMLP(nn.Module):
         self.head_norm = nn.LayerNorm(width)
         self.head_fc1 = nn.Linear(width, hidden)
         self.head_fc2 = nn.Linear(hidden, num_classes)
+        
+        
 
         # Xavier (Glorot) initialization for every linear layer, zero biases.
         for layer in self.modules():
