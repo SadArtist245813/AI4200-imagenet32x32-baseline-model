@@ -67,7 +67,7 @@
 **Why:** My graphs I added in my last change were pointing to a need of different sizes in the network.
 **Expected:** The model to be more accurate, but not change too much due to the small size and needs of the dataset.
 **Result:** This change varied in what number I chose. Base Accuracy 96.99. Base training time 1.0.
-    Blocks = 15 : Accuracy
+    Blocks = 15: Accuracy 97.71. Training Time 0.8.
 
 ### Change 3 — cifar10 — 2026-10-25
 
@@ -75,7 +75,7 @@
 **Why:** My graphs I added in my last change were pointing to a need of different sizes in the network.
 **Expected:** The model to get more accurate with a smaller size since I have seemed to learn noise.
 **Result:** This change varied in what number I chose. Base Accuracy 49.15. Base training time 2.5.
-    Blocks = 15 : Accuracy
+    Blocks = 15: Accuracy 49.93. Training Time 1.9.
 
 ### Change 3 — imagenet32 — 2026-10-25
 
@@ -83,4 +83,4 @@
 **Why:** My graphs I added in my last change were pointing to a need of different sizes in the network.
 **Expected:** The network to get more accurate as the network gets bigger. I am afraid of learning noise though leaving me to maybe think of using types of changes in the model.
 **Result:** This change varied in what number I chose. Base Accuracy 8.42. Base training time 23.1.
-    Blocks = 15, Epochs= 15: Accuracy
+    Blocks = 15, Epochs= 15: Accuracy 9.32. Training Time 25.9.
