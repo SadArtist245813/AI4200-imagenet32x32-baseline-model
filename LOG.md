@@ -60,3 +60,27 @@
 **Why:** I want to find how how far I could go with my activation funtion before I had to focus on another known problem, the model size.
 **Expected:** Very similar or worse then the orginal accuracy.
 **Result:** Accuracy 8.04% -> 8.42. Training time 20 -> 23.1. Curve is not shown.
+
+### Change 3 — mnist — 2026-10-25
+
+**Change:** I change the size other the network to different variations.
+**Why:** My graphs I added in my last change were pointing to a need of different sizes in the network.
+**Expected:** The model to be more accurate, but not change too much due to the small size and needs of the dataset.
+**Result:** This change varied in what number I chose. Base Accuracy 96.99. Base training time 1.0.
+    Blocks = 15 : Accuracy
+
+### Change 3 — cifar10 — 2026-10-25
+
+**Change:** I change the activation function to SiLU. I added graph support to help with analyzation.Z
+**Why:** My graphs I added in my last change were pointing to a need of different sizes in the network.
+**Expected:** The model to get more accurate with a smaller size since I have seemed to learn noise.
+**Result:** This change varied in what number I chose. Base Accuracy 49.15. Base training time 2.5.
+    Blocks = 15 : Accuracy
+
+### Change 3 — imagenet32 — 2026-10-25
+
+**Change:** I change the activation function to SiLU. I added graph support to help with analyzation.
+**Why:** My graphs I added in my last change were pointing to a need of different sizes in the network.
+**Expected:** The network to get more accurate as the network gets bigger. I am afraid of learning noise though leaving me to maybe think of using types of changes in the model.
+**Result:** This change varied in what number I chose. Base Accuracy 8.42. Base training time 23.1.
+    Blocks = 15, Epochs= 15: Accuracy
