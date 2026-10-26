@@ -40,23 +40,23 @@
 **Expected:** I expected the change to be noticable, but not by much, I need a good foudation to start on.
 **Result:** Accuracy 6.77% -> 8.04%. Training time 12.4 min -> 20. Curve is not shown.
 
-### Change 2 — mnist — 2026-10-13
+### Change 2 — mnist — 2026-10-24
 
-**Change:** 
-**Why:** 
-**Expected:** 
-**Result:** Accuracy 97.11% ->. Training time 0.9 ->. Curve is not shown.
+**Change:** I change the activation function to SiLU. I added graph support to help with analyzation.
+**Why:** I want to find how how far I could go with my activation funtion before I had to focus on another known problem, the model size.
+**Expected:** Very similar or worse then the orginal accuracy.
+**Result:** Accuracy 97.11% -> 96.99. Training time 0.9 -> 1.0>. Very similar or worse then the orginal accuracy.
 
-### Change 2 — cifar10 — 2026-10-13
+### Change 2 — cifar10 — 2026-10-24
 
-**Change:** I change the activation function to ReLU.
-**Why:** It was clear as day that the activation function need a change.
-**Expected:** I expected the change to be noticable, but not by much, I need a good foudation to start on.
-**Result:** Accuracy 51.59% ->. Training time 2.3 ->. Curve is not shown.
+**Change:** I change the activation function to SiLU. I added graph support to help with analyzation.
+**Why:** I want to find how how far I could go with my activation funtion before I had to focus on another known problem, the model size.
+**Expected:** Very similar or worse then the orginal accuracy.
+**Result:** Accuracy 51.59% -> 49.15. Training time 2.3 -> 2.5. Loss keeps decreasing but becomes noisy.
 
-### Change 2 — imagenet32 — 2026-10-13
+### Change 2 — imagenet32 — 2026-10-24
 
-**Change:** I change the activation function to ReLU.
-**Why:** It was clear as day that the activation function need a change.
-**Expected:** I expected the change to be noticable, but not by much, I need a good foudation to start on.
-**Result:** Accuracy 8.04% ->. Training time 20 ->. Curve is not shown.
+**Change:** I change the activation function to SiLU. I added graph support to help with analyzation.
+**Why:** I want to find how how far I could go with my activation funtion before I had to focus on another known problem, the model size.
+**Expected:** Very similar or worse then the orginal accuracy.
+**Result:** Accuracy 8.04% -> 8.42. Training time 20 -> 23.1. Curve is not shown.
