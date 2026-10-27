@@ -1,12 +1,12 @@
 import torch
 import torch.nn as nn
 
-# Each task differs only in its input size and its number of classes.
+# Color tasks use 64 non-overlapping 4x4 patches; MNIST stays flattened.
 # The same model class is used for all three.
 TASKS = {
     "mnist":      {"in_features": 28 * 28,     "num_classes": 10},    # 28x28 grayscale
-    "cifar10":    {"in_features": 3 * 32 * 32, "num_classes": 10},    # 32x32 color
-    "imagenet32": {"in_features": 3 * 32 * 32, "num_classes": 1000},  # 32x32 color
+    "cifar10":    {"in_features": 3 * 32 * 32, "num_classes": 10, "num_patches": 64},
+    "imagenet32": {"in_features": 3 * 32 * 32, "num_classes": 1000, "num_patches": 64},
 }
 
 WIDTH = 128   # Width of the Neural Network
@@ -14,27 +14,37 @@ HIDDEN = 256  # Number of neurons in in each hidden layer
 DEPTH = 10    # Number of residual blocks in the backbone
 
 class Block(nn.Module):
-    def __init__(self, width, hidden):
+    def __init__(self, width, hidden, num_patches=None):
         super().__init__()
+        if num_patches is not None:
+            self.patch_norm = nn.LayerNorm(width)
+            self.patch_mlp = nn.Sequential(
+                nn.Linear(num_patches, num_patches * 2), nn.SiLU(),
+                nn.Linear(num_patches * 2, num_patches)
+            )
         self.norm = nn.LayerNorm(width)       # pre-norm: normalize before the layers
         self.fc1 = nn.Linear(width, hidden)   # expand:  width  -> hidden
         self.gate = nn.Linear(width, hidden)  # SwiGLU gating projection
         self.fc2 = nn.Linear(hidden, width)   # project: hidden -> width
 
     def forward(self, x):
+        if hasattr(self, "patch_mlp"):
+            x = x + self.patch_mlp(self.patch_norm(x).transpose(1, 2)).transpose(1, 2)
         z = self.norm(x)
         h = self.fc2(nn.functional.silu(self.fc1(z)) * self.gate(z))
         return x + h                          # skip connection: add the input back
 
 class ResidualMLP(nn.Module):
-    def __init__(self, in_features, num_classes, width=WIDTH, hidden=HIDDEN, depth=DEPTH):
+    def __init__(self, in_features, num_classes, width=WIDTH, hidden=HIDDEN, depth=DEPTH,
+                 num_patches=None):
         super().__init__()
+        self.num_patches = num_patches
 
-        # Project the flattened image down to the backbone width.
-        self.input_layer = nn.Linear(in_features, width)
+        # Project each patch (or the whole MNIST image) into the backbone.
+        self.input_layer = nn.Linear(in_features // (num_patches or 1), width)
 
         # The residual backbone: `depth` identical blocks.
-        self.blocks = nn.ModuleList([Block(width, hidden) for _ in range(depth)])
+        self.blocks = nn.ModuleList([Block(width, hidden, num_patches) for _ in range(depth)])
 
         # The head: same layers as a block, but the last layer outputs class scores.
         self.head_norm = nn.LayerNorm(width)
@@ -50,7 +60,12 @@ class ResidualMLP(nn.Module):
                 nn.init.zeros_(layer.bias)
 
     def forward(self, x, streams=None):
-        x = x.flatten(start_dim=1)            # (N, C, H, W) -> (N, C*H*W)
+        if self.num_patches is not None:
+            # [N, 3, 32, 32] -> [N, 64, 48], in spatial patch order.
+            x = x.reshape(len(x), 3, 8, 4, 8, 4)
+            x = x.permute(0, 2, 4, 1, 3, 5).reshape(len(x), 64, 48)
+        else:
+            x = x.flatten(start_dim=1)
         x = self.input_layer(x)
         if streams is not None:
             x.retain_grad()
@@ -60,6 +75,9 @@ class ResidualMLP(nn.Module):
             if streams is not None:
                 x.retain_grad()
                 streams.append(x)
+
+        if self.num_patches is not None:
+            x = x.mean(dim=1)  # pool patches before classification
 
         # Steps used in each Neuron
         x = self.head_norm(x) # Normilization
