@@ -170,7 +170,7 @@ Though some changes do take affect, they all seem to have an extemely similar re
 
 ### Change 8 — cifar10 — 2026-10-26
 
-**Change:** 
+**Change:** I added 4-pixel padded random crops
 **Why:** 
 **Expected:** 
 **Result:** Accuracy 57.48% -> 58.52%. Training time 2.1 min -> 2.1. Curves in ./graphs/cifar10-change-7.png

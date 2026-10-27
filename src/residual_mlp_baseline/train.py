@@ -16,6 +16,17 @@ def prepare(X):
     """Convert uint8 images (0-255) to floats in roughly [-1, 1]."""
     return (torch.as_tensor(X).float() / 255.0 - 0.5) / 0.5
 
+
+# ---------------------------------------------------------------------------
+# The two functions below are the REQUIRED INTERFACE for every submission.
+# The grading notebook calls them like this:
+#
+#     model = train("cifar10", X_train, y_train, seed=0, device="cuda")
+#     probs = predict(model, X_test)
+#
+# Change anything inside them, but keep their names and arguments.
+# ---------------------------------------------------------------------------
+
 def train(task, X_train, y_train, seed=0, device="cuda", record=False):
     """Build a new model and train it from scratch. Returns the trained model."""
     torch.manual_seed(seed)                   # makes the run reproducible
@@ -47,7 +58,6 @@ def train(task, X_train, y_train, seed=0, device="cuda", record=False):
         "train_loss": [],
         "epoch_train_loss": [],
         "train_accuracy": [],
-        "mixup": task == "cifar10",
         "validation_loss": [],
         "diagnostic_steps": [],
         "epoch_end_steps": [],
@@ -116,17 +126,9 @@ def train(task, X_train, y_train, seed=0, device="cuda", record=False):
                 X_batch = crops[torch.arange(len(X_batch), device=X_batch.device),
                                 :, offsets[:, 0], offsets[:, 1]]
 
-            mix, paired_y = 1.0, y_batch
-            if task == "cifar10":  # Mixup after the other training augmentations
-                mix = torch.distributions.Beta(0.2, 0.2).sample().item()
-                order = torch.randperm(len(X_batch), device=X_batch.device)
-                paired_y = y_batch[order]
-                X_batch = mix * X_batch + (1 - mix) * X_batch[order]
-
             streams = [] if record else None
             logits = model(X_batch, streams=streams)  # forward pass
-            loss = (mix * loss_fn(logits, y_batch)
-                    + (1 - mix) * loss_fn(logits, paired_y))
+            loss = loss_fn(logits, y_batch)   # how wrong are we?
             
             # Recoding Diagnostics
             if diagnostics is not None:
@@ -145,9 +147,7 @@ def train(task, X_train, y_train, seed=0, device="cuda", record=False):
 
             total_loss += loss.item() * len(X_batch)
             if record:
-                predicted = logits.argmax(dim=1)
-                total_correct += (mix * (predicted == y_batch).sum().item()
-                                  + (1 - mix) * (predicted == paired_y).sum().item())
+                total_correct += (logits.argmax(dim=1) == y_batch).sum().item()
 
         print(f"epoch {epoch + 1}: train loss {total_loss / len(dataset):.4f}")
 
@@ -158,8 +158,7 @@ def train(task, X_train, y_train, seed=0, device="cuda", record=False):
             streams = []
             logits = model(X_batch, streams=streams)
             optimizer.zero_grad()
-            (mix * loss_fn(logits, y_batch)
-             + (1 - mix) * loss_fn(logits, paired_y)).backward()
+            loss_fn(logits, y_batch).backward()
             record_snapshot(streams)
             streams.clear()
 
