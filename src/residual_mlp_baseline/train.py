@@ -6,7 +6,7 @@ from .model import TASKS, ResidualMLP
 
 
 # Baseline settings. Deliberately plain so they are easy to beat:
-# plain SGD, constant learning rate, no dropout, no schedule, no augmentation.
+# plain SGD, cosine learning-rate decay, no dropout, no augmentation.
 LEARNING_RATE = 0.05
 BATCH_SIZE = 256
 EPOCHS = {"mnist": 10, "cifar10": 30, "imagenet32": 15}
@@ -41,6 +41,11 @@ def train(task, X_train, y_train, seed=0, device="cuda", record=False):
     # 3. Choose the loss and the optimizer.
     loss_fn = nn.CrossEntropyLoss()           # expects raw logits
     optimizer = torch.optim.SGD(model.parameters(), lr=LEARNING_RATE)
+    
+    # Schedualer for learning rate decay: cosine annealing from 0.05 to 0.001 over the course of training.
+    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
+        optimizer, T_max = EPOCHS[task], eta_min=0.001 # opyimizer, number of epochs, minimum learning rate
+    )
     
     diagnostics = {
         "train_loss": [],
@@ -134,6 +139,8 @@ def train(task, X_train, y_train, seed=0, device="cuda", record=False):
             loss_fn(logits, y_batch).backward()
             record_snapshot(streams)
             streams.clear()
+
+        scheduler.step()  # update the learning rate for the next epoch
 
     return model
 
