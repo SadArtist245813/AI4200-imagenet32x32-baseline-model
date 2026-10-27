@@ -17,16 +17,6 @@ def prepare(X):
     return (torch.as_tensor(X).float() / 255.0 - 0.5) / 0.5
 
 
-# ---------------------------------------------------------------------------
-# The two functions below are the REQUIRED INTERFACE for every submission.
-# The grading notebook calls them like this:
-#
-#     model = train("cifar10", X_train, y_train, seed=0, device="cuda")
-#     probs = predict(model, X_test)
-#
-# Change anything inside them, but keep their names and arguments.
-# ---------------------------------------------------------------------------
-
 def train(task, X_train, y_train, seed=0, device="cuda", record=False):
     """Build a new model and train it from scratch. Returns the trained model."""
     torch.manual_seed(seed)                   # makes the run reproducible

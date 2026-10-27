@@ -5,8 +5,8 @@ import torch.nn as nn
 # The same model class is used for all three.
 TASKS = {
     "mnist":      {"in_features": 28 * 28,     "num_classes": 10},    # 28x28 grayscale
-    "cifar10":    {"in_features": 3 * 32 * 32, "num_classes": 10, "num_patches": 64},
-    "imagenet32": {"in_features": 3 * 32 * 32, "num_classes": 1000, "num_patches": 64},
+    "cifar10":    {"in_features": 3 * 32 * 32, "num_classes": 10, "num_patches": 16},
+    "imagenet32": {"in_features": 3 * 32 * 32, "num_classes": 1000, "num_patches": 16},
 }
 
 WIDTH = 128   # Width of the Neural Network
@@ -40,7 +40,7 @@ class ResidualMLP(nn.Module):
         super().__init__()
         self.num_patches = num_patches
 
-        # Project each patch (or the whole MNIST image) into the backbone.
+        # Project each patch into the backbone.
         self.input_layer = nn.Linear(in_features // (num_patches or 1), width)
 
         # The residual backbone: `depth` identical blocks.
@@ -50,8 +50,6 @@ class ResidualMLP(nn.Module):
         self.head_norm = nn.LayerNorm(width)
         self.head_fc1 = nn.Linear(width, hidden)
         self.head_fc2 = nn.Linear(hidden, num_classes)
-        
-        
 
         # Xavier (Glorot) initialization for every linear layer, zero biases.
         for layer in self.modules():
