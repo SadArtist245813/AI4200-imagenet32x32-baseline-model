@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from torch.utils.data import DataLoader, TensorDataset
+from torch.utils.data import DataLoader, TensorDataset, random_split
 
 from .model import TASKS, ResidualMLP
 
@@ -36,6 +36,13 @@ def train(task, X_train, y_train, seed=0, device="cuda", record=False):
 
     # 2. Wrap the data so we can loop over shuffled mini-batches.
     dataset = TensorDataset(prepare(X_train), torch.as_tensor(y_train).long())
+    if record:
+        validation_size = max(1, len(dataset) // 10)
+        dataset, validation_set = random_split(
+            dataset, [len(dataset) - validation_size, validation_size],
+            generator=torch.Generator().manual_seed(seed)
+        )
+        validation_loader = DataLoader(validation_set, batch_size=BATCH_SIZE)
     loader = DataLoader(dataset, batch_size=BATCH_SIZE, shuffle=True)
 
     # 3. Choose the loss and the optimizer.
@@ -49,6 +56,9 @@ def train(task, X_train, y_train, seed=0, device="cuda", record=False):
     
     diagnostics = {
         "train_loss": [],
+        "epoch_train_loss": [],
+        "train_accuracy": [],
+        "validation_loss": [],
         "diagnostic_steps": [],
         "epoch_end_steps": [],
         "stream_variance": [],
@@ -103,6 +113,7 @@ def train(task, X_train, y_train, seed=0, device="cuda", record=False):
     model.train()
     for epoch in range(EPOCHS[task]):
         total_loss = 0.0
+        total_correct = 0
         for X_batch, y_batch in loader:
             X_batch, y_batch = X_batch.to(device), y_batch.to(device)
 
@@ -130,6 +141,8 @@ def train(task, X_train, y_train, seed=0, device="cuda", record=False):
             step += 1
 
             total_loss += loss.item() * len(X_batch)
+            if record:
+                total_correct += (logits.argmax(dim=1) == y_batch).sum().item()
 
         print(f"epoch {epoch + 1}: train loss {total_loss / len(dataset):.4f}")
 
@@ -143,6 +156,23 @@ def train(task, X_train, y_train, seed=0, device="cuda", record=False):
             loss_fn(logits, y_batch).backward()
             record_snapshot(streams)
             streams.clear()
+
+            # Evaluate held-out training examples without augmentation or updates.
+            model.eval()
+            validation_loss, validation_correct = 0.0, 0
+            with torch.no_grad():
+                for X_val, y_val in validation_loader:
+                    X_val, y_val = X_val.to(device), y_val.to(device)
+                    val_logits = model(X_val)
+                    validation_loss += loss_fn(val_logits, y_val).item() * len(y_val)
+                    validation_correct += (val_logits.argmax(dim=1) == y_val).sum().item()
+            diagnostics["epoch_train_loss"].append(total_loss / len(dataset))
+            diagnostics["train_accuracy"].append(total_correct / len(dataset))
+            diagnostics["validation_loss"].append(validation_loss / len(validation_set))
+            diagnostics["validation_accuracy"].append(validation_correct / len(validation_set))
+            print(f"  validation loss {diagnostics['validation_loss'][-1]:.4f}, "
+                  f"accuracy {diagnostics['validation_accuracy'][-1]:.2%}")
+            model.train()
 
         scheduler.step()  # update the learning rate for the next epoch
 
