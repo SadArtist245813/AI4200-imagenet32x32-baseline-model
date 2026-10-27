@@ -1,7 +1,9 @@
+from math import isqrt
+
 import torch
 import torch.nn as nn
 
-# Color tasks use 64 non-overlapping 4x4 patches; MNIST stays flattened.
+# Color tasks use a configurable square grid of patches; MNIST stays flattened.
 # The same model class is used for all three.
 TASKS = {
     "mnist":      {"in_features": 28 * 28,     "num_classes": 10},    # 28x28 grayscale
@@ -39,6 +41,10 @@ class ResidualMLP(nn.Module):
                  num_patches=None):
         super().__init__()
         self.num_patches = num_patches
+        if num_patches is not None:
+            self.patch_grid = isqrt(num_patches)
+            if self.patch_grid < 1 or self.patch_grid ** 2 != num_patches or 32 % self.patch_grid:
+                raise ValueError("num_patches must be a positive square whose grid divides 32")
 
         # Project each patch into the backbone.
         self.input_layer = nn.Linear(in_features // (num_patches or 1), width)
@@ -59,9 +65,11 @@ class ResidualMLP(nn.Module):
 
     def forward(self, x, streams=None):
         if self.num_patches is not None:
-            # [N, 3, 32, 32] -> [N, 64, 48], in spatial patch order.
-            x = x.reshape(len(x), 3, 8, 4, 8, 4)
-            x = x.permute(0, 2, 4, 1, 3, 5).reshape(len(x), 64, 48)
+            # Split into the configured grid, keeping each patch's pixels together.
+            n, channels, height, width = x.shape
+            grid = self.patch_grid
+            x = x.reshape(n, channels, grid, height // grid, grid, width // grid)
+            x = x.permute(0, 2, 4, 1, 3, 5).reshape(n, self.num_patches, -1)
         else:
             x = x.flatten(start_dim=1)
         x = self.input_layer(x)
