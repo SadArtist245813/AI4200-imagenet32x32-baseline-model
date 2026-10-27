@@ -103,3 +103,29 @@
 **Expected:** The network to get more accurate as the network learns. I am afraid of learning noise though leaving me to maybe think of using other types of changes in the model.
 **Result:** Accuracy 9.32% -> 8.68%. Training time 25.9 min -> 23.7 min. Curves in ./graphs/imagenet32-change-4.png
 
+### Change 5 — mnist — 2026-10-26
+
+**Change:** I add a cosine learning rate decay scheduler with a minimum of
+**Why:** Will suggested to add a scheduler. It would add better control too.
+**Expected:** The network to go back to the better accuracy.
+**Result:** Accuracy 93.14% -> . Training time 0.7 min -> . Curves in ./graphs/mnist-change-4.png
+
+https://docs.pytorch.org/docs/main/generated/torch.optim.lr_scheduler.CosineAnnealingLR.html
+
+### Change 5 — cifar10 — 2026-10-26
+
+**Change:** I add a cosine learning rate decay scheduler with a minimum of
+**Why:** Will suggested to add a scheduler. It would add better control too.
+**Expected:** 
+**Result:** Accuracy 49.91% -> . Training time 1.7 min -> . Curves in ./graphs/cifar10-change-4.png
+
+https://docs.pytorch.org/docs/main/generated/torch.optim.lr_scheduler.CosineAnnealingLR.html
+
+### Change 5 — imagenet32 — 2026-10-26
+
+**Change:** I add a cosine learning rate decay scheduler with a minimum of
+**Why:** Will suggested to add a scheduler. It would add better control too.
+**Expected:** 
+**Result:** Accuracy 8.68% -> . Training time 23.7 min -> . Curves in ./graphs/imagenet32-change-4.png
+
+https://docs.pytorch.org/docs/main/generated/torch.optim.lr_scheduler.CosineAnnealingLR.html
