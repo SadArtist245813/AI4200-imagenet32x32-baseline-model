@@ -117,9 +117,14 @@ def train(task, X_train, y_train, seed=0, device="cuda", record=False):
         for X_batch, y_batch in loader:
             X_batch, y_batch = X_batch.to(device), y_batch.to(device)
 
-            if task in ("cifar10", "imagenet32"):  # training-only random horizontal flips
+            if task in ("cifar10", "imagenet32"):  # training-only flips and padded crops
                 flip = torch.rand(len(X_batch), device=X_batch.device) < 0.5
                 X_batch[flip] = X_batch[flip].flip(-1)
+                padded = nn.functional.pad(X_batch, (4, 4, 4, 4), value=-1.0)
+                crops = padded.unfold(2, 32, 1).unfold(3, 32, 1)
+                offsets = torch.randint(9, (len(X_batch), 2), device=X_batch.device)
+                X_batch = crops[torch.arange(len(X_batch), device=X_batch.device),
+                                :, offsets[:, 0], offsets[:, 1]]
 
             streams = [] if record else None
             logits = model(X_batch, streams=streams)  # forward pass
