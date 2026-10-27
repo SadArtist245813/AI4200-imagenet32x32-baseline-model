@@ -11,7 +11,7 @@ TASKS = {
 
 WIDTH = 128   # Width of the Neural Network
 HIDDEN = 256  # Number of neurons in in each hidden layer
-DEPTH = 10    # Number of residual blocks in the backbone
+DEPTH = 5    # Number of residual blocks in the backbone
 
 class Block(nn.Module):
     """One residual block with a pre-normalized SwiGLU branch.
