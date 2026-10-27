@@ -141,9 +141,9 @@ Though some changes do take affect, they all seem to have an extemely similar re
 
 ### Change 6 — cifar10 — 2026-10-26
 
-**Change:** I add Accuracy and Validation Accuracy graph. I added randomized fliping to the images for input. I added 
-**Why:** 
-**Expected:** 
+**Change:** I add Accuracy and Validation Accuracy graph. I added randomized flipping to the images for input.
+**Why:** I needed an overview for the obviouse overfitting. I also want a way to help with overfitting so I added image flipping. It changes random images in the dataset to be flipped.
+**Expected:** The overfitting to be more fixed then before, but not completely.
 **Result:** Accuracy 54.69% -> 57.48%. Training time 2.1 min -> . Curves in ./graphs/cifar10-change-6-test-1.png
 
 ### Change 6 — imagenet32 — 2026-10-26
@@ -156,9 +156,9 @@ Though some changes do take affect, they all seem to have an extemely similar re
 
 ### Change 7 — cifar10 — 2026-10-26
 
-**Change:** I added 4-pixel padded random crops
-**Why:** 
-**Expected:** 
+**Change:** I added 4-pixel padded random croping.
+**Why:** Just another way to mess with the dataset. It added a padded border and crops a random part of the image. 32x32 -> 40x40 -> 32x32
+**Expected:** It to be less overfitted.
 **Result:** Accuracy 57.48% -> 58.52%. Training time 2.1 min -> 2.1. Curves in ./graphs/cifar10-change-7.png
 
 ### Change 7 — imagenet32 — 2026-10-26

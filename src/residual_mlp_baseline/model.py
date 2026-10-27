@@ -14,22 +14,17 @@ HIDDEN = 256  # Number of neurons in in each hidden layer
 DEPTH = 10    # Number of residual blocks in the backbone
 
 class Block(nn.Module):
-    """One residual block with a pre-normalized SwiGLU branch.
-
-    The block expands to `hidden` features, applies SwiGLU, and projects back to
-    `width` features so its output can be added to its input (the skip connection).
-    """
-
     def __init__(self, width, hidden):
         super().__init__()
         self.norm = nn.LayerNorm(width)       # pre-norm: normalize before the layers
         self.fc1 = nn.Linear(width, hidden)   # expand:  width  -> hidden
-        self.gate = nn.Linear(width, hidden)  # SwiGLU gating projection
+        # self.gate = nn.Linear(width, hidden)  # SwiGLU gating projection
         self.fc2 = nn.Linear(hidden, width)   # project: hidden -> width
 
     def forward(self, x):
         z = self.norm(x)
-        h = self.fc2(nn.functional.silu(self.fc1(z)) * self.gate(z))
+        h = self.fc2(nn.functional.silu(self.fc1(z)))
+        # h = self.fc2(nn.functional.silu(self.fc1(z)) * self.gate(z))
         return x + h                          # skip connection: add the input back
 
 class ResidualMLP(nn.Module):
