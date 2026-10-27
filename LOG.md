@@ -172,11 +172,14 @@ Though some changes do take affect, they all seem to have an extemely similar re
 
 ### Change 8 — cifar10 — 2026-10-26
 
-**Change:** 
-**Why:** 
-**Expected:** 
-**Result:** Accuracy 57.48% -> 58.52%. Training time 2.1 min -> 2.1. Curves in ./graphs/cifar10-change-7.png
+**Change:** I added Patch-Based MLP
+**Why:** I need a bigger change then variable and small techniques. So I found a structual method.
+**Expected:** I have no clue but a higher accuracy. I am afraid of my graphs resaults, but I focused on those so much they might not change too much.
+**Result:** Accuracy 57.48% -> . Training time 2.1 min -> . Curves in ./graphs/cifar10-change-8.png
 
 ### Change 8 — imagenet32 — 2026-10-26
 
-I keep this one untested so I can produce resaults faster for now. It will use the same technique as cifar10 soon.
+**Change:** I added Patch-Based MLP
+**Why:** I need a bigger change then variable and small techniques. So I found a structual method.
+**Expected:** I have no clue but a higher accuracy. I am afraid of my graphs resaults, but I focused on those so much they might not change too much.
+**Result:** Accuracy 8.68% -> . Training time 23.7 min -> . Curves in ./graphs/imagenet32-change-5.png
