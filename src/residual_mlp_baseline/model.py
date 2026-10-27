@@ -11,7 +11,7 @@ TASKS = {
 
 WIDTH = 128   # Width of the Neural Network
 HIDDEN = 256  # Number of neurons in in each hidden layer
-DEPTH = 15    # Number of residual blocks in the backbone
+DEPTH = 10    # Number of residual blocks in the backbone
 
 class Block(nn.Module):
     """One residual block with a pre-normalized SwiGLU branch.
@@ -33,17 +33,6 @@ class Block(nn.Module):
         return x + h                          # skip connection: add the input back
 
 class ResidualMLP(nn.Module):
-    """Baseline residual MLP.
-
-    input -> Linear(in_features -> width)            project into the backbone
-          -> depth x Block                           residual backbone, stays `width` wide
-          -> LayerNorm -> Linear -> SiLU -> Linear   head: a block without the skip
-          -> logits (num_classes)
-
-    The head has no skip connection because its output size (num_classes)
-    differs from its input size (width), so the two cannot be added.
-    """
-
     def __init__(self, in_features, num_classes, width=WIDTH, hidden=HIDDEN, depth=DEPTH):
         super().__init__()
 
