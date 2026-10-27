@@ -137,6 +137,8 @@ https://docs.pytorch.org/docs/2.14/generated/torch.optim.AdamW.html
 
 Though some changes do take affect, they all seem to have an extemely similar resualt of 95%-98% accuracy. The resaults are not noting.
 
+**Change:** Blocks to 10.
+
 ### Change 6 — cifar10 — 2026-10-26
 
 **Change:** I add Accuracy and Validation Accuracy graph. I added randomized fliping to the images for input. I added 
@@ -154,11 +156,25 @@ Though some changes do take affect, they all seem to have an extemely similar re
 
 ### Change 7 — cifar10 — 2026-10-26
 
-**Change:** I added 4-pixel padding, crop and
+**Change:** I added 4-pixel padded random crops
 **Why:** 
 **Expected:** 
-**Result:** Accuracy 54.69% -> 57.48%. Training time 2.1 min -> . Curves in ./graphs/cifar10-change-6-test-1.png
+**Result:** Accuracy 57.48% -> 58.52%. Training time 2.1 min -> 2.1. Curves in ./graphs/cifar10-change-7.png
 
 ### Change 7 — imagenet32 — 2026-10-26
+
+### Change 8 — mnist — 2026-10-26
+
+Though some changes do take affect, they all seem to have an extemely similar resualt of 95%-98% accuracy. The resaults are not noting.
+
+
+### Change 8 — cifar10 — 2026-10-26
+
+**Change:** I added 4-pixel padded random crops
+**Why:** 
+**Expected:** 
+**Result:** Accuracy 57.48% -> 58.52%. Training time 2.1 min -> 2.1. Curves in ./graphs/cifar10-change-7.png
+
+### Change 8 — imagenet32 — 2026-10-26
 
 I keep this one untested so I can produce resaults faster for now. It will use the same technique as cifar10 soon.
