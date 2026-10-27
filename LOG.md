@@ -105,27 +105,30 @@
 
 ### Change 5 — mnist — 2026-10-26
 
-**Change:** I add a cosine learning rate decay scheduler with a minimum of
-**Why:** Will suggested to add a scheduler. It would add better control too.
+**Change:** I add a cosine learning rate decay scheduler with a minimum of 0.00001.
+**Why:** Will suggested to add a scheduler and AdamW. It would add better control too.
 **Expected:** The network to go back to the better accuracy.
-**Result:** Accuracy 93.14% -> . Training time 0.7 min -> . Curves in ./graphs/mnist-change-4.png
+**Result:** Accuracy 93.14% -> 98.51%. Training time 0.7 min -> 0.8 min. Curves in ./graphs/mnist-change-5.png
 
 https://docs.pytorch.org/docs/main/generated/torch.optim.lr_scheduler.CosineAnnealingLR.html
+https://docs.pytorch.org/docs/2.14/generated/torch.optim.AdamW.html
 
 ### Change 5 — cifar10 — 2026-10-26
 
-**Change:** I add a cosine learning rate decay scheduler with a minimum of
-**Why:** Will suggested to add a scheduler. It would add better control too.
-**Expected:** 
-**Result:** Accuracy 49.91% -> . Training time 1.7 min -> . Curves in ./graphs/cifar10-change-4.png
+**Change:** I add a cosine learning rate decay scheduler with a minimum of 0.00001.
+**Why:** Will suggested to add a scheduler and AdamW. It would add better control too.
+**Expected:** The accuracy to be a little better, I most like would need to look as some my parameters to help discover better methods.
+**Result:** Accuracy 49.91% -> 54.69%. Training time 1.7 min -> 2.1 min. Curves in ./graphs/cifar10-change-5.png
 
 https://docs.pytorch.org/docs/main/generated/torch.optim.lr_scheduler.CosineAnnealingLR.html
+https://docs.pytorch.org/docs/2.14/generated/torch.optim.AdamW.html
 
 ### Change 5 — imagenet32 — 2026-10-26
 
-**Change:** I add a cosine learning rate decay scheduler with a minimum of
-**Why:** Will suggested to add a scheduler. It would add better control too.
-**Expected:** 
-**Result:** Accuracy 8.68% -> . Training time 23.7 min -> . Curves in ./graphs/imagenet32-change-4.png
+**Change:** I add a cosine learning rate decay scheduler with a minimum of 0.00001.
+**Why:** Will suggested to add a scheduler and AdamW. It would add better control too.
+**Expected:** Not too much of a change. I most likey depends on my parameters.
+**Result:** Accuracy 8.68% -> 8.76%. Training time 23.7 min -> 31.5 min. Curves in ./graphs/imagenet32-change-5.png
 
 https://docs.pytorch.org/docs/main/generated/torch.optim.lr_scheduler.CosineAnnealingLR.html
+https://docs.pytorch.org/docs/2.14/generated/torch.optim.AdamW.html
