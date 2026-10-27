@@ -9,7 +9,7 @@ TASKS = {
     "imagenet32": {"in_features": 3 * 32 * 32, "num_classes": 1000},  # 32x32 color
 }
 
-WIDTH = 256   # Width of the Neural Network
+WIDTH = 128   # Width of the Neural Network
 HIDDEN = 256  # Number of neurons in in each hidden layer
 DEPTH = 10    # Number of residual blocks in the backbone
 
