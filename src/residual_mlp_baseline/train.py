@@ -106,6 +106,10 @@ def train(task, X_train, y_train, seed=0, device="cuda", record=False):
         for X_batch, y_batch in loader:
             X_batch, y_batch = X_batch.to(device), y_batch.to(device)
 
+            if task in ("cifar10", "imagenet32"):  # training-only random horizontal flips
+                flip = torch.rand(len(X_batch), device=X_batch.device) < 0.5
+                X_batch[flip] = X_batch[flip].flip(-1)
+
             streams = [] if record else None
             logits = model(X_batch, streams=streams)  # forward pass
             loss = loss_fn(logits, y_batch)   # how wrong are we?
