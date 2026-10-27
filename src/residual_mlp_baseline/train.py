@@ -7,7 +7,7 @@ from .model import TASKS, ResidualMLP
 
 # Baseline settings. Deliberately plain so they are easy to beat:
 # plain SGD, cosine learning-rate decay, no dropout, no augmentation.
-LEARNING_RATE = 0.005
+LEARNING_RATE = 0.01
 BATCH_SIZE = 256
 EPOCHS = {"mnist": 10, "cifar10": 30, "imagenet32": 15}
 
