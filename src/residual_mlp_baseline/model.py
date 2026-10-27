@@ -18,13 +18,12 @@ class Block(nn.Module):
         super().__init__()
         self.norm = nn.LayerNorm(width)       # pre-norm: normalize before the layers
         self.fc1 = nn.Linear(width, hidden)   # expand:  width  -> hidden
-        # self.gate = nn.Linear(width, hidden)  # SwiGLU gating projection
+        self.gate = nn.Linear(width, hidden)  # SwiGLU gating projection
         self.fc2 = nn.Linear(hidden, width)   # project: hidden -> width
 
     def forward(self, x):
         z = self.norm(x)
-        h = self.fc2(nn.functional.silu(self.fc1(z)))
-        # h = self.fc2(nn.functional.silu(self.fc1(z)) * self.gate(z))
+        h = self.fc2(nn.functional.silu(self.fc1(z)) * self.gate(z))
         return x + h                          # skip connection: add the input back
 
 class ResidualMLP(nn.Module):
@@ -51,10 +50,6 @@ class ResidualMLP(nn.Module):
                 nn.init.zeros_(layer.bias)
 
     def forward(self, x, streams=None):
-        """Training forward pass. Returns raw logits (no softmax).W
-
-        nn.CrossEntropyLoss applies the softmax itself, so training uses logits.
-        """
         x = x.flatten(start_dim=1)            # (N, C, H, W) -> (N, C*H*W)
         x = self.input_layer(x)
         if streams is not None:

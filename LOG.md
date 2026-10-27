@@ -144,7 +144,7 @@ Though some changes do take affect, they all seem to have an extemely similar re
 **Change:** I add Accuracy and Validation Accuracy graph. I added randomized flipping to the images for input.
 **Why:** I needed an overview for the obviouse overfitting. I also want a way to help with overfitting so I added image flipping. It changes random images in the dataset to be flipped.
 **Expected:** The overfitting to be more fixed then before, but not completely.
-**Result:** Accuracy 54.69% -> 57.48%. Training time 2.1 min -> . Curves in ./graphs/cifar10-change-6-test-1.png
+**Result:** Accuracy 54.69% -> 57.48%. Training time 2.1 min -> 1.5. Curves in ./graphs/cifar10-change-6-test-1.png
 
 ### Change 6 — imagenet32 — 2026-10-26
 
@@ -162,6 +162,8 @@ Though some changes do take affect, they all seem to have an extemely similar re
 **Result:** Accuracy 57.48% -> 58.52%. Training time 2.1 min -> 2.1. Curves in ./graphs/cifar10-change-7.png
 
 ### Change 7 — imagenet32 — 2026-10-26
+
+I keep this one untested so I can produce resaults faster for now. It will use the same technique as cifar10 soon.
 
 ### Change 8 — mnist — 2026-10-26
 
