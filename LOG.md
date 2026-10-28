@@ -169,17 +169,35 @@ I keep this one untested so I can produce resaults faster for now. It will use t
 
 Though some changes do take affect, they all seem to have an extemely similar resualt of 95%-98% accuracy. The resaults are not noting.
 
+I did want to try patch-based mlp.
+
 
 ### Change 8 — cifar10 — 2026-10-26
 
-**Change:** I added Patch-Based MLP
+**Change:** I added Patch-Based MLP.
 **Why:** I need a bigger change then variable and small techniques. So I found a structual method.
 **Expected:** I have no clue but a higher accuracy. I am afraid of my graphs resaults, but I focused on those so much they might not change too much.
 **Result:** Accuracy 57.48% -> . Training time 2.1 min -> . Curves in ./graphs/cifar10-change-8.png
 
+Introduces a Path-Based MLP. The math uses ideas from a the paper "MLP-Mixer: An all-MLP Architecture for Vision." The instructions allowed patch-based mixing in the network. It has simlar concepts to convolutional layers but is only used at the beginning. 
+
+As ChatGPT decribed it. “This is a patch-based MLP with global dense spatial mixing. It uses no convolutional layer classes, but its shared patch embedding and per-patch feature projections have convolutional equivalents.” Due it's resemblence to convolutional methods, I will explain best resaults without the method.
+
+https://proceedings.nips.cc/paper_files/paper/2021/file/cba0a4ee5ccd02fda0fe3f9a3e7b89fe-Paper.pdf
+
+https://www.youtube.com/results?search_query=patch-based+MLP+%2F+patch+mixing.
+
 ### Change 8 — imagenet32 — 2026-10-26
 
-**Change:** I added Patch-Based MLP
+**Change:** I added Patch-Based MLP.
 **Why:** I need a bigger change then variable and small techniques. So I found a structual method.
 **Expected:** I have no clue but a higher accuracy. I am afraid of my graphs resaults, but I focused on those so much they might not change too much.
-**Result:** Accuracy 8.68% -> . Training time 23.7 min -> . Curves in ./graphs/imagenet32-change-5.png
+**Result:** Accuracy 8.68% -> (I saw a 15.48 on epoch #2). Training time 23.7 min -> (No Clue). Curves in ./graphs/imagenet32-change-5.png
+
+Introduces a Path-Based MLP. The math uses ideas from a the paper "MLP-Mixer: An all-MLP Architecture for Vision." The instructions allowed patch-based mixing in the network. It has simlar concepts to convolutional layers but is only used at the beginning. 
+
+As ChatGPT decribed it. “This is a patch-based MLP with global dense spatial mixing. It uses no convolutional layer classes, but its shared patch embedding and per-patch feature projections have convolutional equivalents.” Due it's resemblence to convolutional methods, I will explain best resaults without the method.
+
+https://proceedings.nips.cc/paper_files/paper/2021/file/cba0a4ee5ccd02fda0fe3f9a3e7b89fe-Paper.pdf
+
+https://www.youtube.com/results?search_query=patch-based+MLP+%2F+patch+mixing.
