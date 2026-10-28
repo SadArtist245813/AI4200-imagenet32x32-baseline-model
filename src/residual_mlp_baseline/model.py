@@ -5,8 +5,8 @@ import torch.nn as nn
 # The same model class is used for all three.
 TASKS = {
     "mnist":      {"in_features": 28 * 28,     "num_classes": 10},    # 28x28 grayscale
-    "cifar10":    {"in_features": 3 * 32 * 32, "num_classes": 10},
-    "imagenet32": {"in_features": 3 * 32 * 32, "num_classes": 1000}
+    "cifar10":    {"in_features": 3 * 32 * 32, "num_classes": 10},    # 32x32 color
+    "imagenet32": {"in_features": 3 * 32 * 32, "num_classes": 1000}   # 32x32 color
 }
 
 WIDTH = 128   # Width of the Neural Network
@@ -18,13 +18,13 @@ class Block(nn.Module):
         super().__init__()
 
         self.norm = nn.LayerNorm(width)       # pre-norm: normalize before the layers
-        self.fc1 = nn.Linear(width, hidden)   # expand:  width  -> hidden
+        self.fc1 = nn.Linear(width, hidden)   # expand:  width -> hidden
         self.gate = nn.Linear(width, hidden)  # SwiGLU gating projection
         self.fc2 = nn.Linear(hidden, width)   # project: hidden -> width
 
     def forward(self, x):
-        z = self.norm(x)
-        h = self.fc2(nn.functional.silu(self.fc1(z)) * self.gate(z))
+        z = self.norm(x) # Normilization
+        h = self.fc2(nn.functional.silu(self.fc1(z)) * self.gate(z)) # SwiGLU Activation
         return x + h                          # skip connection: add the input back
 
 class ResidualMLP(nn.Module):
@@ -49,6 +49,7 @@ class ResidualMLP(nn.Module):
                 nn.init.zeros_(layer.bias)
 
     def forward(self, x, streams=None):
+        # Flatten the input
         x = x.flatten(start_dim=1)
         
         x = self.input_layer(x)

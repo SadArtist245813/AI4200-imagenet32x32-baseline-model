@@ -5,17 +5,13 @@ from torch.utils.data import DataLoader, TensorDataset, random_split
 from .model import TASKS, ResidualMLP
 
 
-# Baseline settings. Deliberately plain so they are easy to beat:
-# plain SGD, cosine learning-rate decay, no dropout, no augmentation.
 LEARNING_RATE = 0.001
 BATCH_SIZE = 256
 EPOCHS = {"mnist": 10, "cifar10": 30, "imagenet32": 15}
 
-
 def prepare(X):
     """Convert uint8 images (0-255) to floats in roughly [-1, 1]."""
     return (torch.as_tensor(X).float() / 255.0 - 0.5) / 0.5
-
 
 def train(task, X_train, y_train, seed=0, device="cuda", record=False):
     """Build a new model and train it from scratch. Returns the trained model."""
@@ -107,7 +103,8 @@ def train(task, X_train, y_train, seed=0, device="cuda", record=False):
         for X_batch, y_batch in loader:
             X_batch, y_batch = X_batch.to(device), y_batch.to(device)
 
-            if task in ("cifar10", "imagenet32"):  # training-only flips and padded crops
+            # Data Augmentation. Training-only flips and padded crops
+            if task in ("cifar10", "imagenet32"):
                 flip = torch.rand(len(X_batch), device=X_batch.device) < 0.5
                 X_batch[flip] = X_batch[flip].flip(-1)
                 padded = nn.functional.pad(X_batch, (4, 4, 4, 4), value=-1.0)
@@ -154,6 +151,8 @@ def train(task, X_train, y_train, seed=0, device="cuda", record=False):
 
             # Evaluate held-out training examples without augmentation or updates.
             model.eval()
+            
+            # Recording Diagnostics
             validation_loss, validation_correct = 0.0, 0
             with torch.no_grad():
                 for X_val, y_val in validation_loader:
