@@ -1,0 +1,3 @@
+The imagenet32 analysis is based on the graphs in folder "./graphs". The final model's graph is called "imagenet32-change-final.png"
+They can be enabled through the variable "PLOT_RESULTS", "SAVE_GRAPHS" and "CHANGE" in project1_harness.ipynb.
+More is explained the logs and reports.
