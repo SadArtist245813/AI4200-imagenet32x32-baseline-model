@@ -7,8 +7,8 @@ import torch.nn as nn
 # The same model class is used for all three.
 TASKS = {
     "mnist":      {"in_features": 28 * 28,     "num_classes": 10},    # 28x28 grayscale
-    "cifar10":    {"in_features": 3 * 32 * 32, "num_classes": 10, "num_patches": 16},
-    "imagenet32": {"in_features": 3 * 32 * 32, "num_classes": 1000, "num_patches": 16},
+    "cifar10":    {"in_features": 3 * 32 * 32, "num_classes": 10, "num_patches": 4},
+    "imagenet32": {"in_features": 3 * 32 * 32, "num_classes": 1000, "num_patches": 4},
 }
 
 WIDTH = 128   # Width of the Neural Network
