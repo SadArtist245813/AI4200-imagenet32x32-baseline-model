@@ -9,7 +9,7 @@ from .model import TASKS, ResidualMLP
 # plain SGD, cosine learning-rate decay, no dropout, no augmentation.
 LEARNING_RATE = 0.001
 BATCH_SIZE = 256
-EPOCHS = {"mnist": 10, "cifar10": 25, "imagenet32": 10}
+EPOCHS = {"mnist": 10, "cifar10": 30, "imagenet32": 15}
 
 
 def prepare(X):
@@ -75,7 +75,7 @@ def train(task, X_train, y_train, seed=0, device="cuda", record=False):
         ])
         correlations = []
         for stream in streams:
-            samples = stream.detach().flatten(start_dim=1)
+            samples = stream.detach()
             samples = samples - samples.mean(dim=1, keepdim=True)
             samples = nn.functional.normalize(samples, dim=1)
             batch_size = samples.size(0)
