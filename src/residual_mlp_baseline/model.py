@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 
-# Color tasks use 64 non-overlapping 4x4 patches; MNIST stays flattened.
+# Color tasks use 64 patches of 4x4 pixels per image; MNIST stays flattened.
 # The same model class is used for all three.
 TASKS = {
     "mnist":      {"in_features": 28 * 28,     "num_classes": 10},    # 28x28 grayscale
@@ -39,6 +39,12 @@ class ResidualMLP(nn.Module):
                  num_patches=None):
         super().__init__()
         self.num_patches = num_patches
+        if num_patches is not None:
+            grid = int(num_patches ** 0.5)
+            if grid < 1 or grid * grid != num_patches or 32 % grid:
+                raise ValueError("num_patches must be a positive square whose grid divides 32")
+            patch_size = 32 // grid
+            self.patchify = nn.Unfold(kernel_size=patch_size, stride=patch_size)
 
         # Project each patch (or the whole MNIST image) into the backbone.
         self.input_layer = nn.Linear(in_features // (num_patches or 1), width)
@@ -61,9 +67,8 @@ class ResidualMLP(nn.Module):
 
     def forward(self, x, streams=None):
         if self.num_patches is not None:
-            # [N, 3, 32, 32] -> [N, 64, 48], in spatial patch order.
-            x = x.reshape(len(x), 3, 8, 4, 8, 4)
-            x = x.permute(0, 2, 4, 1, 3, 5).reshape(len(x), 64, 48)
+            # [batch, channels, height, width] -> [batch, patches, pixels per patch].
+            x = self.patchify(x).transpose(1, 2)
         else:
             x = x.flatten(start_dim=1)
         x = self.input_layer(x)
